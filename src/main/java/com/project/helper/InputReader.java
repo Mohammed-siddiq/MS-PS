@@ -39,7 +39,7 @@ public class InputReader {
         Log.info("Opening the params file " + fileName);
 
         try {
-            fp = new BufferedReader(new FileReader(new File(fileName)))
+            fp = new BufferedReader(new FileReader(new File(fileName)));
         } catch (FileNotFoundException e) {
             Log.info("File not found :" + fileName);
             e.printStackTrace();
