@@ -1,4 +1,4 @@
-package com.project.msps;
+package com.project;
 
 import com.oracle.tools.packager.Log;
 import com.project.helper.InputReader;
@@ -6,10 +6,8 @@ import com.project.helper.InputReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.Buffer;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class driverClass {
     public static void main(String[] args) throws IOException {
