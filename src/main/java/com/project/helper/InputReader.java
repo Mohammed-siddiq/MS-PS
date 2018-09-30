@@ -9,6 +9,7 @@ import java.util.List;
 
 public class InputReader {
     private static final String SDC_KEY = "SDC";
+    public static int SDC_VALUE;
     BufferedReader fp;
 
     //
@@ -54,7 +55,8 @@ public class InputReader {
             String[] keyValue = line.split("=");
             if (keyValue[0].equals(SDC_KEY)) {
                 value = (int) Math.ceil(Double.parseDouble(keyValue[1])* numberOfSequences);
-                mis.put(SDC_KEY, value);
+                SDC_VALUE = value;
+//                mis.put(SDC_KEY, value); // No need to put SDC into the hashmap
                 continue;
             }
             key = keyValue[0].substring(keyValue[0].indexOf("(") + 1, keyValue[0].indexOf(")")); //[0] has the key

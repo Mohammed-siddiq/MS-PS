@@ -1,13 +1,13 @@
 package com.project.msps;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 public class MineSequentialPatterns {
     List<String> sequenceData;
     HashMap<String, Integer> mis;
-    List<HashMap<String, Integer>> frequentSequences;
+    List<LinkedHashMap<String, Integer>> frequentSequences;
 
     public void setSequenceData(List<String> sequenceData) {
         this.sequenceData = sequenceData;
@@ -55,19 +55,64 @@ public class MineSequentialPatterns {
                 frequent1Sequences.put( "< { " +item + " } >", itemSupport);
             }
         }
-        frequentSequences.add(frequent1Sequences);
+        LinkedHashMap<String, Integer> sortedF1Sequences = sortFrequent1Items(frequent1Sequences); // sorting based on keys first and then value
+        frequentSequences.add(sortedF1Sequences);
+        for (Map.Entry<String, Integer> frequentItem :
+                sortedF1Sequences.entrySet()) {
 
+            applySDCAndGenerateSk(frequentItem.getKey());
+
+        }
         outputFrequentSequences();
+    }
+
+
+    private void applySDCAndGenerateSk(String item) {
+        item = replaceBraces(item);
+        item = item.replaceAll("\\{|\\}|<|>","").trim();
+        for (String sequence :
+                sequenceData) {
+            if (sequence.contains(item)){ // only if item is in the sequence apply sdc
+                if(satisfiesSDC(sequence,item)){
+
+                }
+
+
+            }
+        }
+        
+    }
+
+    // replaces brackets and angular brackets
+    private String replaceBraces(String item) {
+        return item.replaceAll("\\{|\\}|<|>","").trim();
+    }
+
+    private boolean satisfiesSDC(String sequence, String item) {
+        String rawSequence = replaceBraces(sequence);
+        return true;
+
+    }
+
+
+    private LinkedHashMap<String, Integer> sortFrequent1Items(HashMap<String, Integer> frequent1Sequences) {
+        LinkedHashMap<String, Integer> result = frequent1Sequences.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                .sorted(Map.Entry.comparingByValue())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        return result;
     }
 
     public void outputFrequentSequences() {
 
         for (int i = 0; i < frequentSequences.size(); i++) {
             System.out.println("The number of length " + (i + 1) + " sequential pattern is " + frequentSequences.get(i).size());
-            for (String sequence :
-                    frequentSequences.get(i).keySet()) {
-                System.out.println("Pattern: " + sequence + ":Count=" + frequentSequences.get(i).get(sequence));
-            }
+//            for (String sequence :
+//                    frequentSequences.get(i).keySet()) {
+//                System.out.println("Pattern: " + sequence + ":Count=" + frequentSequences.get(i).get(sequence));
+//            }
+            frequentSequences.forEach(f1SequenceMap -> f1SequenceMap.forEach((key,value)->
+                    System.out.println("Pattern :" + key + ": Count=" + value)));
         }
     }
 
