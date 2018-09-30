@@ -27,7 +27,7 @@ public class InputReader {
         String line;
         List<String> sequences = new ArrayList<String>();
 
-        while ((line = fp.readLine())!=null){
+        while ((line = fp.readLine()) != null) {
             sequences.add(line);
         }
         Log.info("Successfully read the Sequence file");
@@ -35,7 +35,8 @@ public class InputReader {
         return sequences;
 
     }
-    public HashMap<String,Float> minimumSupportReader(String fileName) throws IOException {
+
+    public HashMap<String, Integer> minimumSupportReader(String fileName, int numberOfSequences) throws IOException {
         Log.info("Opening the params file " + fileName);
 
         try {
@@ -47,17 +48,19 @@ public class InputReader {
 
         String line;
         String key;
-        HashMap<String,Float> mis = new HashMap<String, Float>();
-        while((line=fp.readLine())!=null)
-        {
-           String[] keyValue =  line.split("=");
-           if(keyValue[0].equals(SDC_KEY))
-           {
-               mis.put(SDC_KEY,Float.parseFloat(keyValue[1]));
-               continue;
-           }
-           key = keyValue[0].substring(keyValue[0].indexOf("("),keyValue[0].indexOf(")")+1); //[0] has the key
-           mis.put(key,Float.parseFloat(keyValue[1])); // [1] has the value
+        int value;
+        HashMap<String, Integer> mis = new HashMap<>();
+        while ((line = fp.readLine()) != null) {
+            String[] keyValue = line.split("=");
+            if (keyValue[0].equals(SDC_KEY)) {
+                value = (int) Math.ceil(Double.parseDouble(keyValue[1])* numberOfSequences);
+                mis.put(SDC_KEY, value);
+                continue;
+            }
+            key = keyValue[0].substring(keyValue[0].indexOf("(") + 1, keyValue[0].indexOf(")")); //[0] has the key
+            value = (int) Math.ceil(Double.parseDouble(keyValue[1]) * numberOfSequences);
+
+            mis.put(key,value); // [1] has the value
         }
         return mis;
     }
