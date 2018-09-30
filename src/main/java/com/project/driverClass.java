@@ -10,6 +10,15 @@ import java.util.HashMap;
 import java.util.List;
 
 public class driverClass {
+
+    static void printlist(List<String> list) {
+
+        for (String s :
+                list) {
+            System.out.println(s);
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         InputReader inputReader = new InputReader();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -21,18 +30,24 @@ public class driverClass {
         HashMap<String, Float> mis;
         try {
             inputSequences = inputReader.sequenceReader(dataFile);
+            System.out.println("sequences ");
+            printlist(inputSequences);
         } catch (IOException e) {
             Log.info("Error while reading the Sequences from the data");
             e.printStackTrace();
         }
         try {
-            mis = inputReader.minimumSupportReader(dataFile);
-        }
-        catch (IOException e)
-        {
+            mis = inputReader.minimumSupportReader(paramsFile);
+            System.out.println("mis values");
+            for (String key :
+                    mis.keySet()) {
+                System.out.println(mis.get(key));
+            }
+
+
+        } catch (IOException e) {
             Log.info("Error while");
         }
-
 
 
     }
