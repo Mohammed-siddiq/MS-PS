@@ -1,6 +1,10 @@
 package com.project.helper;
 
 import com.oracle.tools.packager.Log;
+import com.project.POJOS.Database;
+import com.project.POJOS.Item;
+import com.project.POJOS.ItemSet;
+import com.project.POJOS.Sequence;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -11,11 +15,17 @@ public class InputReader {
     private static final String SDC_KEY = "SDC";
     public static int SDC_VALUE;
     BufferedReader fp;
+    Database db;
+    Sequence sequence;
+    ItemSet itemSet;
+    Item item;
+    List<Item> items;
 
-    //
-//    public InputReader(){
-//        fp = new FileReader()
-//    }
+
+    public InputReader() {
+        db = new Database();
+    }
+
     public List<String> sequenceReader(String fileName) throws IOException {
         Log.info("Opening the data file " + fileName);
 
@@ -26,20 +36,48 @@ public class InputReader {
             e.printStackTrace();
         }
         String line;
-        List<String> sequences = new ArrayList<String>();
+        List<String> sequenceAsString = new ArrayList<String>();
 
         while ((line = fp.readLine()) != null) {
-            sequences.add(line);
+            sequenceAsString.add(line);
+            Sequence sequenceInstance = generateItemSetsAndSequences(line);
+            db.addSequence(sequenceInstance);
         }
         Log.info("Successfully read the Sequence file");
         fp.close();
-        return sequences;
+        return sequenceAsString;
 
     }
 
-    public HashMap<String, Integer> minimumSupportReader(String fileName, int numberOfSequences) throws IOException {
+    private Sequence generateItemSetsAndSequences(String line) {
+        String[] itemSetString = line.split("}");
+        sequence = new Sequence();
+        for (String itemSetStr : itemSetString) {
+            itemSetStr = itemSetStr.replaceAll("\\{|<|>", "");
+            if(itemSetStr.length()==0) continue;
+            itemSet = new ItemSet();
+            String[] itemsStr = itemSetStr.split(",");
+            for (String s : itemsStr) {
+                Item itemInstance = getItemObject(s);// gets the item instance for the item read from the Sequence
+                itemSet.addItem(itemInstance);
+            }
+            sequence.addItemSet(itemSet);
+        }
+        return sequence;
+    }
+
+    private Item getItemObject(String s) {
+        for (Item item : items) {
+            if (item.toString().equals(s))
+                return item;
+        }
+        return null;
+    }
+
+    public HashMap<String, Double> minimumSupportReader(String fileName) throws IOException {
         Log.info("Opening the params file " + fileName);
 
+        items = new ArrayList<>();
         try {
             fp = new BufferedReader(new FileReader(new File(fileName)));
         } catch (FileNotFoundException e) {
@@ -49,20 +87,23 @@ public class InputReader {
 
         String line;
         String key;
-        int value;
-        HashMap<String, Integer> mis = new HashMap<>();
+        double value;
+        HashMap<String, Double> mis = new HashMap<>();
         while ((line = fp.readLine()) != null) {
             String[] keyValue = line.split("=");
             if (keyValue[0].equals(SDC_KEY)) {
-                value = (int) Math.ceil(Double.parseDouble(keyValue[1])* numberOfSequences);
-                SDC_VALUE = value;
-//                mis.put(SDC_KEY, value); // No need to put SDC into the hashmap
-                continue;
+                key = SDC_KEY;
+                value = Double.parseDouble(keyValue[1]);
+            } else {
+                item = new Item();
+                value = Double.parseDouble(keyValue[1]);
+                key = keyValue[0].substring(keyValue[0].indexOf("(") + 1, keyValue[0].indexOf(")")); //[0] has the key
+                item.setItem(key);
+                item.setMis(value);
+                items.add(item);
             }
-            key = keyValue[0].substring(keyValue[0].indexOf("(") + 1, keyValue[0].indexOf(")")); //[0] has the key
-            value = (int) Math.ceil(Double.parseDouble(keyValue[1]) * numberOfSequences);
 
-            mis.put(key,value); // [1] has the value
+            mis.put(key, value); // [1] has the value
         }
         return mis;
     }

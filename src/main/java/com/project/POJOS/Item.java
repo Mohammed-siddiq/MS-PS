@@ -3,7 +3,7 @@ package com.project.POJOS;
 public class Item {
 
     String item;
-    int  mis;
+    double  mis;
     int support;
 
     public String getItem() {
@@ -14,11 +14,11 @@ public class Item {
         this.item = item;
     }
 
-    public int getMis() {
+    public double getMis() {
         return mis;
     }
 
-    public void setMis(int mis) {
+    public void setMis(double mis) {
         this.mis = mis;
     }
 
@@ -28,5 +28,10 @@ public class Item {
 
     public void setSupport(int support) {
         this.support = support;
+    }
+
+    @Override
+    public String toString() {
+        return item;
     }
 }

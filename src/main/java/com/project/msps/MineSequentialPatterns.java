@@ -1,24 +1,32 @@
 package com.project.msps;
 
+import com.project.POJOS.Database;
+import com.project.POJOS.Item;
+import com.project.POJOS.ItemSet;
+import com.project.POJOS.Sequence;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class MineSequentialPatterns {
     List<String> sequenceData;
-    HashMap<String, Integer> mis;
+    HashMap<String, Double> mis;
     List<LinkedHashMap<String, Integer>> frequentSequences;
+    Database frequentSequenceDb;
+    Database skDb;
 
     public void setSequenceData(List<String> sequenceData) {
         this.sequenceData = sequenceData;
     }
 
-    public void setMis(HashMap<String, Integer> mis) {
+    public void setMis(HashMap<String, Double> mis) {
         this.mis = mis;
     }
 
     public MineSequentialPatterns() {
         frequentSequences = new ArrayList<>();
+        frequentSequenceDb = new Database();
     }
 //    public MineSequentialPatterns(ArrayList<String> sequenceData, HashMap<String, Float> mis) {
 //        this.sequenceData = sequenceData;
@@ -38,7 +46,7 @@ public class MineSequentialPatterns {
         return supportCount;
     }
 
-    public void algorithmMSPS(List<String> sequenceData, HashMap<String, Integer> mis) {
+    public void algorithmMSPS(List<String> sequenceData, HashMap<String, Double> mis) {
 
         setSequenceData(sequenceData);
         setMis(mis);
@@ -52,7 +60,7 @@ public class MineSequentialPatterns {
                 mis.keySet()) {
             itemSupport = getSupportCount(item);
             if (itemSupport >= mis.get(item)) {
-                frequent1Sequences.put( "< { " +item + " } >", itemSupport);
+                frequent1Sequences.put("< { " + item + " } >", itemSupport);
             }
         }
         LinkedHashMap<String, Integer> sortedF1Sequences = sortFrequent1Items(frequent1Sequences); // sorting based on keys first and then value
@@ -69,23 +77,22 @@ public class MineSequentialPatterns {
 
     private void applySDCAndGenerateSk(String item) {
         item = replaceBraces(item);
-        item = item.replaceAll("\\{|\\}|<|>","").trim();
-        for (String sequence :
-                sequenceData) {
-            if (sequence.contains(item)){ // only if item is in the sequence apply sdc
-                if(satisfiesSDC(sequence,item)){
+        item = item.replaceAll("\\{|\\}|<|>", "").trim();
+        for (String sequence : sequenceData) {
+            if (sequence.contains(item)) { // only if item is in the sequence apply sdc
+                if (satisfiesSDC(sequence, item)) {
 
                 }
 
 
             }
         }
-        
+
     }
 
     // replaces brackets and angular brackets
     private String replaceBraces(String item) {
-        return item.replaceAll("\\{|\\}|<|>","").trim();
+        return item.replaceAll("\\{|\\}|<|>", "").trim();
     }
 
     private boolean satisfiesSDC(String sequence, String item) {
@@ -111,9 +118,62 @@ public class MineSequentialPatterns {
 //                    frequentSequences.get(i).keySet()) {
 //                System.out.println("Pattern: " + sequence + ":Count=" + frequentSequences.get(i).get(sequence));
 //            }
-            frequentSequences.forEach(f1SequenceMap -> f1SequenceMap.forEach((key,value)->
+            frequentSequences.forEach(f1SequenceMap -> f1SequenceMap.forEach((key, value) ->
                     System.out.println("Pattern :" + key + ": Count=" + value)));
         }
     }
+
+    public void generateFrequentSequences(Database database) {
+        List<Item> frequentItems = new ArrayList<Item>();
+
+        // find frequent items
+        for (Sequence sequence : database.getSequences()) {
+            for (ItemSet itemSet : sequence.getItemSets()) {
+                for (Item item : itemSet.getItems()) {
+                    if (item.getSupport() >= item.getMis()) {
+                        frequentItems.add(item);
+                    }
+                }
+            }
+        }
+
+
+        //sorting
+        Collections.sort(frequentItems, new Comparator<Item>() {
+            @Override
+            public int compare(Item i1, Item i2) {
+                return i1.getItem().compareTo(i2.getItem());
+            }
+        });
+
+
+        for (Item item :
+                frequentItems) {
+            skDb = database;
+            for (Sequence sequence : skDb.getSequences()) {
+                if (sequence.toString().contains(item.toString())) {
+                    Sequence sdSequence = applySupportDifferenceConstraint(sequence, item);
+
+                } else
+                    database.getSequences().remove(sequence);
+
+            }
+        }
+    }
+
+    private Sequence applySupportDifferenceConstraint(Sequence sequence, Item itemI) {
+        Sequence sequenceSDC = new Sequence();
+        for (ItemSet itemSet : sequence.getItemSets()) {
+            for (Item itemJ : itemSet.getItems()) {
+                // different item should be.
+                if (Math.abs(itemI.getSupport() - itemJ.getSupport()) > Database.SDC) {
+                    sequence.removeItem(itemJ);
+                }
+            }
+        }
+
+        return null;
+    }
+
 
 }
